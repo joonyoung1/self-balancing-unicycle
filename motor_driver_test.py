@@ -54,59 +54,57 @@ try:
         user_input = input()
 
         if user_input == "w":  # Forward
+            gradual_change(q, 0)  # PWM 점진적 감소
+            gradual_change(p, 0)
             GPIO.output(in1, GPIO.HIGH)
             GPIO.output(in2, GPIO.LOW)
-
             GPIO.output(in4, GPIO.HIGH)
             GPIO.output(in3, GPIO.LOW)
-
             print("Forward")
             gradual_change(q, 75)  # 오른쪽 모터 점진적 증가
             gradual_change(p, 75)  # 왼쪽 모터 점진적 증가
 
         elif user_input == "s":  # Backward
+            gradual_change(q, 0)
+            gradual_change(p, 0)
             GPIO.output(in1, GPIO.LOW)
             GPIO.output(in2, GPIO.HIGH)
-
             GPIO.output(in4, GPIO.LOW)
             GPIO.output(in3, GPIO.HIGH)
-
             print("Back")
             gradual_change(q, 75)
             gradual_change(p, 75)
 
         elif user_input == "d":  # Right
+            gradual_change(q, 0)
+            gradual_change(p, 0)
             GPIO.output(in1, GPIO.LOW)
             GPIO.output(in2, GPIO.HIGH)
-
             GPIO.output(in4, GPIO.LOW)
             GPIO.output(in3, GPIO.LOW)
-
             print("Right")
             gradual_change(q, 50)  # 오른쪽 모터 낮은 PWM
             gradual_change(p, 75)  # 왼쪽 모터 높은 PWM
 
         elif user_input == "a":  # Left
+            gradual_change(q, 0)
+            gradual_change(p, 0)
             GPIO.output(in1, GPIO.HIGH)
             GPIO.output(in2, GPIO.LOW)
-
             GPIO.output(in4, GPIO.LOW)
             GPIO.output(in3, GPIO.LOW)
-
             print("Left")
             gradual_change(q, 75)  # 오른쪽 모터 높은 PWM
             gradual_change(p, 50)  # 왼쪽 모터 낮은 PWM
 
         elif user_input == "c":  # Stop
-            GPIO.output(in1, GPIO.LOW)
-            GPIO.output(in2, GPIO.LOW)
-
-            GPIO.output(in4, GPIO.LOW)
-            GPIO.output(in3, GPIO.LOW)
-
             print("Stop")
             gradual_change(q, 0)  # PWM 점진적 감소
             gradual_change(p, 0)
+            GPIO.output(in1, GPIO.LOW)
+            GPIO.output(in2, GPIO.LOW)
+            GPIO.output(in4, GPIO.LOW)
+            GPIO.output(in3, GPIO.LOW)
 
 except KeyboardInterrupt:
     GPIO.cleanup()
