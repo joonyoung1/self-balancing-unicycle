@@ -3,87 +3,83 @@ from time import sleep
 
 GPIO.setwarnings(False)
 
-# Right Motor
-in1 = 17
-in2 = 27
-en_a = 4
-# Left Motor
-in3 = 5
-in4 = 6
-en_b = 13
+# Right Motor (DRV8871 1번 모듈)
+in1 = 17  # Right motor IN1 (PWM 사용)
+in2 = 27  # Right motor IN2
+
+# Left Motor (DRV8871 2번 모듈)
+in3 = 5   # Left motor IN1 (PWM 사용)
+in4 = 6   # Left motor IN2
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(in1, GPIO.OUT)
 GPIO.setup(in2, GPIO.OUT)
-GPIO.setup(en_a, GPIO.OUT)
-
 GPIO.setup(in3, GPIO.OUT)
 GPIO.setup(in4, GPIO.OUT)
-GPIO.setup(en_b, GPIO.OUT)
 
-q = GPIO.PWM(en_a, 100)
-p = GPIO.PWM(en_b, 100)
-p.start(75)
-q.start(75)
+# PWM 설정 (IN1, IN3 핀에서 PWM 제어)
+pwm_right = GPIO.PWM(in1, 100)  # Right motor PWM (100Hz)
+pwm_left = GPIO.PWM(in3, 100)   # Left motor PWM (100Hz)
+pwm_right.start(0)  # 초기 속도 0%
+pwm_left.start(0)   # 초기 속도 0%
 
-GPIO.output(in1, GPIO.LOW)
-GPIO.output(in2, GPIO.LOW)
-GPIO.output(in4, GPIO.LOW)
-GPIO.output(in3, GPIO.LOW)
+GPIO.output(in2, GPIO.LOW)  # Right motor 초기 방향
+GPIO.output(in4, GPIO.LOW)  # Left motor 초기 방향
 
-# Wrap main content in a try block so we can  catch the user pressing CTRL-C and run the
-# GPIO cleanup function. This will also prevent the user seeing lots of unnecessary error messages.
 try:
+    speed = 100
     # Create Infinite loop to read user input
     while True:
         # Get user Input
         user_input = input()
 
-        # To see users input
-        # print(user_input)
-
         if user_input == "w":
-            GPIO.output(in1, GPIO.HIGH)
-            GPIO.output(in2, GPIO.LOW)
-
-            GPIO.output(in4, GPIO.HIGH)
-            GPIO.output(in3, GPIO.LOW)
-
+            # Forward
+            GPIO.output(in2, GPIO.LOW)  # Right motor 정방향
+            GPIO.output(in4, GPIO.LOW)  # Left motor 정방향
+            pwm_right.ChangeDutyCycle(speed)  # 속도 75%
+            pwm_left.ChangeDutyCycle(speed)   # 속도 75%
             print("Forward")
 
         elif user_input == "s":
-            GPIO.output(in1, GPIO.LOW)
-            GPIO.output(in2, GPIO.HIGH)
-
-            GPIO.output(in4, GPIO.LOW)
-            GPIO.output(in3, GPIO.HIGH)
+            # Backward
+            GPIO.output(in2, GPIO.HIGH)  # Right motor 역방향
+            GPIO.output(in4, GPIO.HIGH)  # Left motor 역방향
+            pwm_right.ChangeDutyCycle(speed)  # 속도 75%
+            pwm_left.ChangeDutyCycle(speed)   # 속도 75%
             print("Back")
 
         elif user_input == "d":
-            GPIO.output(in1, GPIO.LOW)
-            GPIO.output(in2, GPIO.HIGH)
-
-            GPIO.output(in4, GPIO.LOW)
-            GPIO.output(in3, GPIO.LOW)
+            # Right Turn
+            GPIO.output(in2, GPIO.LOW)  # Right motor 정방향
+            GPIO.output(in4, GPIO.LOW)  # Left motor 정지
+            pwm_right.ChangeDutyCycle(speed)  # Right motor 속도 75%
+            pwm_left.ChangeDutyCycle(0)    # Left motor 속도 0%
             print("Right")
 
         elif user_input == "a":
-            GPIO.output(in1, GPIO.HIGH)
-            GPIO.output(in2, GPIO.LOW)
-
-            GPIO.output(in4, GPIO.LOW)
-            GPIO.output(in3, GPIO.LOW)
+            # Left Turn
+            GPIO.output(in2, GPIO.LOW)  # Right motor 정지
+            GPIO.output(in4, GPIO.LOW)  # Left motor 정방향
+            pwm_right.ChangeDutyCycle(0)    # Right motor 속도 0%
+            pwm_left.ChangeDutyCycle(speed)    # Left motor 속도 75%
             print("Left")
 
-        # Press 'c' to exit the script
         elif user_input == "c":
-            GPIO.output(in1, GPIO.LOW)
+            # Stop
+            pwm_right.ChangeDutyCycle(0)  # Right motor 정지
+            pwm_left.ChangeDutyCycle(0)   # Left motor 정지
             GPIO.output(in2, GPIO.LOW)
-
             GPIO.output(in4, GPIO.LOW)
-            GPIO.output(in3, GPIO.LOW)
             print("Stop")
+        
+        elif user_input == "f":
+            speed = min(100, speed + 10)
+        elif user_input == "g":
+            speed = max(20, speed - 10)
 
 except KeyboardInterrupt:
+    pwm_right.stop()
+    pwm_left.stop()
     GPIO.cleanup()
     print("GPIO Clean up")
