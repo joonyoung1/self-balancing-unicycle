@@ -10,7 +10,7 @@ class Encoder:
         self.pi = pigpio.pi()
         self.encoder_position = 0
         
-        self.DEBOUNCE_TIME = 1000
+        self.DEBOUNCE_TIME = 100
         self.last_tick = 0
         
         self.A_values = deque(maxlen=5)
@@ -50,10 +50,9 @@ class Encoder:
         self.last_B = B
 
     def get_position(self):
-        return self.encoder_position
-
-    def reset_position(self):
-        self.encoder_position = 0
+        current_position = self.encoder_position
+        self.encoder_position = 0  # 위치를 리셋
+        return current_position
 
 
 if __name__ == "__main__":
